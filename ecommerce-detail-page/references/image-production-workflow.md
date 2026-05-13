@@ -10,8 +10,10 @@ Generate images in parallel by default.
 2. Create one independent image-generation job per cut: `cut-01`, `cut-02`, ..., `cut-N`.
 3. Start all cut jobs at the same time when the environment supports parallel agents or parallel tool calls.
 4. Each cut job must use only its approved cut copy, layout, style template, and product photo reference.
-5. Do not merge cuts into one tall image unless the user explicitly asks.
-6. Collect all outputs before final delivery.
+5. If the approved plan marks a product photo as `재생성 권장`, the cut job must use that photo as a reference only and generate a cleaner ecommerce-ready product visual with improved lighting, background, crop, and composition.
+6. Reference-based regeneration must preserve visible product shape, color, package structure, and readable labels, but must not invent unreadable labels, certifications, ingredients, or claims.
+7. Do not merge cuts into one tall image unless the user explicitly asks.
+8. Collect all outputs before final delivery.
 
 If the environment cannot truly run image jobs in parallel, keep the job design parallel and explain only if needed; do not change the required output count.
 

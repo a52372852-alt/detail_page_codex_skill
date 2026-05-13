@@ -15,6 +15,7 @@ Use this skill to turn product information into an image-first ecommerce detail 
 - Prefer Codex's internal choice UI when available. If it is unavailable in the current mode or client, fall back to visible text choices such as A/B/C.
 - At the beginning, check whether the user has product photos. If photos are provided, use those photos as the product appearance source of truth for planning and image production.
 - When product photos are provided, analyze the images before planning. Identify product angle, visible package/label, color, texture, background quality, usable crop areas, text-safe spaces, strengths, defects, and which cuts each image should be used for. Then recommend image placement and composition per cut.
+- If provided product photos are low quality for final sales use, do not silently use them as-is. Mark the photo status as `재생성 권장`, explain the specific issue, and ask whether to regenerate cleaner detail-page visuals using the photo as a reference before final image production.
 - For true sales-ready final images, request enough product photos: front/package, actual product or contents, detail/texture, options/colors, components, size reference, usage scene, and shipping package when relevant. For cosmetics, food, health supplements, baby, and pet products, label/ingredients/cautions photos are especially important.
 - If product photos or verified sale facts are missing, final image output can only be a sales draft/concept, not a fully production-ready marketplace page. Say this plainly before image production.
 - The user may provide only a product name or category. In that case, infer a recommended category if needed, research or infer likely target customers, cut count, and selling angle, then clearly mark them as assumptions or confirmation-needed items.
@@ -74,6 +75,18 @@ For a real sellable page, prefer these photo types:
 - If none are available, clearly label outputs as `판매용 초안` or `컨셉 기획` until actual photos and facts are provided.
 
 If photos are provided, read [photo-analysis.md](references/photo-analysis.md) and produce a short `상품 사진 분석 및 배치 추천` section before the cut plan.
+
+If any provided photo is too blurry, dark, cluttered, low-resolution, cropped, distorted, or visually weak for a marketplace detail page, ask this before final image generation:
+
+```text
+제공된 사진 중 일부가 판매용 상세페이지에 바로 쓰기에는 품질이 낮습니다. 어떻게 진행할까요?
+
+A. 사진을 참고 이미지로만 사용하고 깨끗한 상품 이미지로 재생성 (추천)
+B. 더 좋은 원본 사진을 추가한 뒤 다시 기획
+C. 현재 사진을 그대로 사용하되 판매용 초안으로 표시
+```
+
+If the user chooses A, final image prompts must preserve the real product shape, color, packaging structure, and readable facts from the photo while improving lighting, background, crop, and ecommerce presentation. Do not invent unreadable labels, certifications, ingredients, claims, or brand details.
 
 ### Question 2: Progress Mode
 
@@ -259,18 +272,19 @@ C. 상품 사진 또는 사실 정보 추가 후 다시 기획
 5. Treat the approved or latest plan as the source of truth for image generation.
 6. Generate sales-ready images cut by cut using the image-generation model, each cut's approved copy, image composition, ASCII wireframe, design notes, and product photo reference if provided.
 7. The generated image must include the approved Korean text inside the image: headline, subcopy, labels, key benefit text, guide text, and CTA when present. Preserve mobile readability with large type, strong hierarchy, and enough contrast.
-8. Final images must be actual backgrounds, product photos/visuals, information blocks, and Korean copy composed together. They must not be blank text-safe images, placeholder-only layouts, or decorative concept art.
-9. If the image-generation model does not render Korean text accurately, regenerate the cut with a clearer prompt that repeats the exact Korean text, reduces text volume, increases text size, and simplifies the layout. The default recovery path is regeneration with the image model, not text overlay.
-10. Generate exactly the planned number of images, one image per cut. If a plan has 12 cuts, produce 12 separate cut images.
-11. Start all cut image jobs in parallel whenever the environment allows it. Preferred pattern:
+8. If the approved photo-analysis status is `재생성 권장`, use the photo as a reference image instead of a direct final asset: regenerate a cleaner ecommerce-ready version with improved lighting, background, crop, and composition while preserving only visible product facts.
+9. Final images must be actual backgrounds, product photos/visuals, information blocks, and Korean copy composed together. They must not be blank text-safe images, placeholder-only layouts, or decorative concept art.
+10. If the image-generation model does not render Korean text accurately, regenerate the cut with a clearer prompt that repeats the exact Korean text, reduces text volume, increases text size, and simplifies the layout. The default recovery path is regeneration with the image model, not text overlay.
+11. Generate exactly the planned number of images, one image per cut. If a plan has 12 cuts, produce 12 separate cut images.
+12. Start all cut image jobs in parallel whenever the environment allows it. Preferred pattern:
     - create one worker/agent per cut or per small cut group
     - assign disjoint ownership such as `cut-01`, `cut-02`, ..., `cut-N`
     - each worker uses the approved cut copy and style
     - collect all outputs before final delivery
-12. Do not merge all cuts into one tall image unless explicitly requested.
-13. When all images are complete, create an HTML review page using [image-production-workflow.md](references/image-production-workflow.md). The page must show cuts in order and include download links plus a `전체 다운로드` button.
-14. Run the Korean text QA checklist before final delivery. If any cut fails, regenerate only the failed cut with a stricter prompt.
-15. Even if the user asks to move fast, show the planning output first and ask the generate-or-revise choice before starting image production.
+13. Do not merge all cuts into one tall image unless explicitly requested.
+14. When all images are complete, create an HTML review page using [image-production-workflow.md](references/image-production-workflow.md). The page must show cuts in order and include download links plus a `전체 다운로드` button.
+15. Run the Korean text QA checklist before final delivery. If any cut fails, regenerate only the failed cut with a stricter prompt.
+16. Even if the user asks to move fast, show the planning output first and ask the generate-or-revise choice before starting image production.
 
 ## Final Image Standard
 
@@ -292,22 +306,23 @@ Final detail-page images must look like real marketplace detail-page sections, n
 2. Ask only one unresolved intake question at a time, with explicit choices.
 3. Check whether product photos exist. If provided, use them as the visual source of truth.
 4. If photos are provided, analyze them with [photo-analysis.md](references/photo-analysis.md) and recommend which image or crop should be used in each cut.
-5. Once category or product name is known, research or infer likely target/customer segments and show recommended options with `(추천)`.
-6. Treat sales channel as optional; ask only when channel-specific constraints are important.
-7. If only a product name is provided, build recommended assumptions instead of blocking.
-8. Read [category-checks.md](references/category-checks.md) for the selected or inferred category's required facts, image emphasis, and risky claims.
-9. Read [style-templates.md](references/style-templates.md), recommend or confirm a style, and apply it consistently.
-10. Choose cut count:
+5. If photo quality is weak, ask whether to regenerate clean ecommerce visuals using the photo as a reference before final image production.
+6. Once category or product name is known, research or infer likely target/customer segments and show recommended options with `(추천)`.
+7. Treat sales channel as optional; ask only when channel-specific constraints are important.
+8. If only a product name is provided, build recommended assumptions instead of blocking.
+9. Read [category-checks.md](references/category-checks.md) for the selected or inferred category's required facts, image emphasis, and risky claims.
+10. Read [style-templates.md](references/style-templates.md), recommend or confirm a style, and apply it consistently.
+11. Choose cut count:
    - Simple product: 6 cuts.
    - Default mobile detail page: exactly 12 cuts.
    - High-consideration or explanation-heavy product: exactly 15 cuts.
-11. Use [cut-structure.md](references/cut-structure.md) to build the persuasion flow: hero, problem, solution, differentiator, detail, usage, proof, options, delivery/care, CTA.
-12. Write every cut using the format in [output-template.md](references/output-template.md).
-13. Include ASCII layout wireframes in the planning output, not final image-generation prompts.
-14. Run the final compliance and quality pass in [copy-compliance.md](references/copy-compliance.md).
-15. Ask whether to generate images or revise before image production.
-16. During final image production, render the approved Korean text directly inside each image and verify no cut is textless or placeholder-only.
-17. Generate all approved cut images in parallel when possible, then build the sequential HTML gallery/download page and run Korean text QA.
+12. Use [cut-structure.md](references/cut-structure.md) to build the persuasion flow: hero, problem, solution, differentiator, detail, usage, proof, options, delivery/care, CTA.
+13. Write every cut using the format in [output-template.md](references/output-template.md).
+14. Include ASCII layout wireframes in the planning output, not final image-generation prompts.
+15. Run the final compliance and quality pass in [copy-compliance.md](references/copy-compliance.md).
+16. Ask whether to generate images or revise before image production.
+17. During final image production, render the approved Korean text directly inside each image and verify no cut is textless or placeholder-only.
+18. Generate all approved cut images in parallel when possible, then build the sequential HTML gallery/download page and run Korean text QA.
 
 ## Output Contract
 
@@ -329,6 +344,7 @@ Each cut must include:
 - 이미지 내 삽입 문구
 - 이미지 구성
 - 사진 배치 추천
+- 사진 품질 판단
 - ASCII 레이아웃
 - 상품 사실 정보
 - 사용 사진
@@ -346,6 +362,7 @@ Before answering, verify:
 - The number of cuts exactly matches the selected cut count.
 - The selected style template is visible in the plan and consistently reflected in copy, layout, and image direction.
 - If product photos were provided, the plan includes image analysis and per-cut placement recommendations.
+- If product photos were weak, the plan states whether each weak photo should be used as-is, replaced, or used only as a reference for cleaner regenerated visuals.
 - Each cut is specific enough to create an actual image.
 - Planning output uses ASCII wireframes instead of image-generation prompts.
 - Final generated images include the approved Korean text inside the image.
