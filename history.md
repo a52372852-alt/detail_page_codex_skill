@@ -24,6 +24,7 @@
 - Added parallel image-production guidance, Korean text QA, and an HTML review/download workflow with `references/image-production-workflow.md` plus `scripts/build-image-gallery.mjs`.
 - Started image generation for the live lipstick detail page using image-generation-model-only Korean text rendering, 6 separate Coupang practical-style cuts.
 - Applied the new workflow to the generated lipstick 6-cut set: copied ordered `cut-01` through `cut-06` files, built `generated/lipstick-coupang-practical/index.html`, added a ZIP download, and recorded `qa-report.md`.
+- Improved the skill for provided product images: added `references/photo-analysis.md`, a product-photo analysis and placement recommendation section, and per-cut `사진 배치 추천` output.
 
 ## 2026-05-11
 
