@@ -29,7 +29,7 @@ Use this skill to turn product information into an image-first ecommerce detail 
 - Final image production must use the image-generation model as the production tool, including the Korean text inside the image. Do not switch to deterministic text overlay, SVG/Sharp, Photoshop-style compositing, or manual post-processing unless the user explicitly asks for that separate workflow.
 - If Korean text inside final images is missing, broken, unreadable, replaced with English, or materially different from the approved copy, treat the image as failed and regenerate it with a stricter image-generation prompt. Do not patch the text afterward unless the user explicitly asks for post-processing.
 - If image generation starts, generate exactly the planned cut count. Never collapse a 12-cut plan into fewer images or one combined image unless the user explicitly asks for a combined mockup.
-- Image production must be parallel by default: run one independent cut-generation job per planned cut, preferably through parallel agents when available. Keep each worker/job scoped to `cut-01` through `cut-N`; do not wait for cut 1 to finish before starting cut 2.
+- Image production must use parallel agents by default to reduce generation time. Start one independent image-generation worker/job per planned cut at the same time whenever agent tooling is available. Keep each worker/job scoped to `cut-01` through `cut-N`; do not generate cut 1, wait, then generate cut 2 sequentially unless the environment truly cannot run parallel work.
 - After all cut images are complete, build an HTML review/download page that shows images sequentially and provides a `전체 다운로드` button. Use `scripts/build-image-gallery.mjs` when local image files are available.
 - After generation, run a text QA pass for every cut. Check that approved Korean copy is present, readable, not broken, not translated, not replaced, and not missing. Failed cuts must be regenerated with stricter prompts.
 - Confirm the product category through user selection, or explicitly mark the recommended category as an assumption when proceeding from product name only.
@@ -277,9 +277,11 @@ C. 상품 사진 또는 사실 정보 추가 후 다시 기획
 10. If the image-generation model does not render Korean text accurately, regenerate the cut with a clearer prompt that repeats the exact Korean text, reduces text volume, increases text size, and simplifies the layout. The default recovery path is regeneration with the image model, not text overlay.
 11. Generate exactly the planned number of images, one image per cut. If a plan has 12 cuts, produce 12 separate cut images.
 12. Start all cut image jobs in parallel whenever the environment allows it. Preferred pattern:
-    - create one worker/agent per cut or per small cut group
+    - create one parallel agent/worker per cut by default
+    - for very large plans, create small disjoint cut groups only if the environment cannot handle one worker per cut
     - assign disjoint ownership such as `cut-01`, `cut-02`, ..., `cut-N`
     - each worker uses the approved cut copy and style
+    - start every worker before waiting for any worker result
     - collect all outputs before final delivery
 13. Do not merge all cuts into one tall image unless explicitly requested.
 14. When all images are complete, create an HTML review page using [image-production-workflow.md](references/image-production-workflow.md). The page must show cuts in order and include download links plus a `전체 다운로드` button.
@@ -322,7 +324,7 @@ Final detail-page images must look like real marketplace detail-page sections, n
 15. Run the final compliance and quality pass in [copy-compliance.md](references/copy-compliance.md).
 16. Ask whether to generate images or revise before image production.
 17. During final image production, render the approved Korean text directly inside each image and verify no cut is textless or placeholder-only.
-18. Generate all approved cut images in parallel when possible, then build the sequential HTML gallery/download page and run Korean text QA.
+18. Generate all approved cut images through simultaneous parallel agents when possible, then build the sequential HTML gallery/download page and run Korean text QA.
 
 ## Output Contract
 

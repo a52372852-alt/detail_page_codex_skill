@@ -104,7 +104,7 @@ ASCII is only a planning blueprint. Do not output ASCII boxes, placeholder label
 
 When the user chooses image generation, convert the approved cut plan into production prompts internally. Generate one separate image per cut, exactly matching the approved cut count. Use the product photo as the visual source if one was provided.
 
-Generate cut images in parallel whenever possible. After all cuts are complete, build a sequential HTML review/download page with `scripts/build-image-gallery.mjs`. The HTML must show every cut in order, include per-cut download links, and include a `전체 다운로드` action.
+Generate cut images through simultaneous parallel agents whenever possible. Start one independent cut-generation agent/job for every planned cut before waiting for any result. After all cuts are complete, build a sequential HTML review/download page with `scripts/build-image-gallery.mjs`. The HTML must show every cut in order, include per-cut download links, and include a `전체 다운로드` action.
 
 Final images must be sellable marketplace detail-page cuts:
 

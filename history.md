@@ -26,6 +26,9 @@
 - Applied the new workflow to the generated lipstick 6-cut set: copied ordered `cut-01` through `cut-06` files, built `generated/lipstick-coupang-practical/index.html`, added a ZIP download, and recorded `qa-report.md`.
 - Improved the skill for provided product images: added `references/photo-analysis.md`, a product-photo analysis and placement recommendation section, and per-cut `사진 배치 추천` output.
 - Added a weak-photo handling rule: if provided product images are not good enough for sales use, the skill must recommend using them as references for cleaner regenerated ecommerce visuals before final image production.
+- Started a new house-plum detail-page task from `/Users/firstandre/Downloads/drive-download-20260513T022015Z-3-001`; inspected 11 source images and created `generated/house-plum/source-contact-sheet.jpg` for photo analysis.
+- Generated the house-plum 12-cut detail-page image set under `generated/house-plum/cuts`, regenerated cut 03 after text QA, rebuilt `generated/house-plum/index.html`, and packaged `house-plum-12cuts.zip`.
+- Tightened image-production instructions so approved detail-page cuts must be generated through simultaneous parallel agents/jobs by default, launching every cut before waiting for results.
 
 ## 2026-05-11
 
