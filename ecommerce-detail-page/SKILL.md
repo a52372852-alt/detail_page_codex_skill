@@ -9,6 +9,35 @@ description: Use when the user wants to make, plan, improve, or generate an ecom
 
 Use this skill to turn product information into an image-first ecommerce detail page plan. The output is not a long article; it is a production-ready cut plan for designers or image-generation tools.
 
+## How To Start
+
+Trigger this skill when the user says phrases like:
+
+```text
+상세페이지 만들고 싶어
+상세페이지 제작해
+[상품명] 상세페이지 만들어줘 추천으로
+이 상품 사진으로 상세페이지 만들어줘
+```
+
+Recommended first-turn handling:
+
+- If the user provides product photos, start with photo analysis and placement recommendations.
+- If the user gives only a product name or category, infer recommended category, target customer, style, and cut count, then mark assumptions clearly.
+- If the user says `추천으로`, use recommended defaults instead of asking every optional question.
+- Do not make sales channel mandatory. Use generic mobile ecommerce unless the user mentions Coupang, Smart Store, brand mall, or ad landing.
+- Always plan first, then ask whether to generate images or revise.
+
+Default recommended settings when the user gives minimal input:
+
+| Item | Default |
+|---|---|
+| Detail-page style | Category-fit recommendation from `references/style-templates.md` |
+| Cut count | 12 cuts |
+| Sales channel | Channel-neutral mobile ecommerce |
+| Product facts | Use only provided facts; mark missing fields as `확인 필요` |
+| Image production | One image per cut, maximum available parallel agents/jobs |
+
 ## Non-Negotiables
 
 - Ask intake questions one at a time, and always show explicit choices for the current question.
@@ -29,7 +58,7 @@ Use this skill to turn product information into an image-first ecommerce detail 
 - Final image production must use the image-generation model as the production tool, including the Korean text inside the image. Do not switch to deterministic text overlay, SVG/Sharp, Photoshop-style compositing, or manual post-processing unless the user explicitly asks for that separate workflow.
 - If Korean text inside final images is missing, broken, unreadable, replaced with English, or materially different from the approved copy, treat the image as failed and regenerate it with a stricter image-generation prompt. Do not patch the text afterward unless the user explicitly asks for post-processing.
 - If image generation starts, generate exactly the planned cut count. Never collapse a 12-cut plan into fewer images or one combined image unless the user explicitly asks for a combined mockup.
-- Image production must use parallel agents by default to reduce generation time. Start one independent image-generation worker/job per planned cut at the same time whenever agent tooling is available. Keep each worker/job scoped to `cut-01` through `cut-N`; do not generate cut 1, wait, then generate cut 2 sequentially unless the environment truly cannot run parallel work.
+- Image production must use maximum available parallel agents by default to reduce generation time. The coordinating agent should split the approved plan into independent `cut-01` through `cut-N` jobs, launch as many cut workers at the same time as the environment allows, then wait only after all possible workers are running. Never generate cut 1, wait, then generate cut 2 sequentially unless the environment truly cannot run parallel work.
 - After all cut images are complete, build an HTML review/download page that shows images sequentially and provides a `전체 다운로드` button. Use `scripts/build-image-gallery.mjs` when local image files are available.
 - After generation, run a text QA pass for every cut. Check that approved Korean copy is present, readable, not broken, not translated, not replaced, and not missing. Failed cuts must be regenerated with stricter prompts.
 - Confirm the product category through user selection, or explicitly mark the recommended category as an assumption when proceeding from product name only.
@@ -276,13 +305,14 @@ C. 상품 사진 또는 사실 정보 추가 후 다시 기획
 9. Final images must be actual backgrounds, product photos/visuals, information blocks, and Korean copy composed together. They must not be blank text-safe images, placeholder-only layouts, or decorative concept art.
 10. If the image-generation model does not render Korean text accurately, regenerate the cut with a clearer prompt that repeats the exact Korean text, reduces text volume, increases text size, and simplifies the layout. The default recovery path is regeneration with the image model, not text overlay.
 11. Generate exactly the planned number of images, one image per cut. If a plan has 12 cuts, produce 12 separate cut images.
-12. Start all cut image jobs in parallel whenever the environment allows it. Preferred pattern:
-    - create one parallel agent/worker per cut by default
-    - for very large plans, create small disjoint cut groups only if the environment cannot handle one worker per cut
+12. Start all cut image jobs with maximum parallelism whenever the environment allows it. Preferred pattern:
+    - the main agent acts only as coordinator, QA reviewer, and final assembler
+    - create one parallel image-generation worker per cut by default
     - assign disjoint ownership such as `cut-01`, `cut-02`, ..., `cut-N`
-    - each worker uses the approved cut copy and style
-    - start every worker before waiting for any worker result
-    - collect all outputs before final delivery
+    - give each worker only its approved cut copy, layout, style, product photo reference, and output filename
+    - launch all available workers first; do not wait for any worker result until every possible worker has started
+    - for very large plans or tool limits, launch the largest supported batch, then immediately launch the next batch as slots free up
+    - collect all outputs before final delivery and regenerate only failed cuts
 13. Do not merge all cuts into one tall image unless explicitly requested.
 14. When all images are complete, create an HTML review page using [image-production-workflow.md](references/image-production-workflow.md). The page must show cuts in order and include download links plus a `전체 다운로드` button.
 15. Run the Korean text QA checklist before final delivery. If any cut fails, regenerate only the failed cut with a stricter prompt.

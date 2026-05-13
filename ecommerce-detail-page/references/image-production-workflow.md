@@ -4,19 +4,22 @@ Use this after the user approves a cut plan and chooses image generation.
 
 ## Parallel Generation
 
-Generate images through simultaneous parallel agents by default. The purpose is to reduce waiting time by starting all cut-production work before waiting for any single cut to finish.
+Generate images through simultaneous parallel agents by default. The purpose is to reduce waiting time by starting all cut-production work before waiting for any single cut to finish. Use the maximum concurrency the environment supports.
 
 1. Fix the approved cut count first.
-2. Create one independent image-generation agent/job per cut: `cut-01`, `cut-02`, ..., `cut-N`.
-3. Start all cut agents/jobs at the same time when the environment supports parallel agents or parallel tool calls.
-4. Do not wait for `cut-01` before launching `cut-02`; launch every planned cut first, then collect results.
-5. Each cut job must use only its approved cut copy, layout, style template, and product photo reference.
-6. If the approved plan marks a product photo as `재생성 권장`, the cut job must use that photo as a reference only and generate a cleaner ecommerce-ready product visual with improved lighting, background, crop, and composition.
-7. Reference-based regeneration must preserve visible product shape, color, package structure, and readable labels, but must not invent unreadable labels, certifications, ingredients, or claims.
-8. Do not merge cuts into one tall image unless the user explicitly asks.
-9. Collect all outputs before final delivery.
+2. The main agent is the coordinator only: it splits work, starts workers, collects outputs, runs QA, and builds the final gallery.
+3. Create one independent image-generation agent/job per cut by default: `cut-01`, `cut-02`, ..., `cut-N`.
+4. Give each cut agent only its assigned cut copy, layout, style template, product photo reference, and required output filename.
+5. Start all available cut agents/jobs at the same time when the environment supports parallel agents or parallel tool calls.
+6. Do not wait for `cut-01` before launching `cut-02`; launch every possible cut worker first, then collect results.
+7. If the environment has a worker/tool limit, run the largest supported batch and immediately launch the next waiting cut when one slot finishes. Keep the workflow parallel, not one-by-one.
+8. Each cut job must stay inside its assigned ownership. A worker for `cut-04` must not rewrite or regenerate `cut-03`.
+9. If the approved plan marks a product photo as `재생성 권장`, the cut job must use that photo as a reference only and generate a cleaner ecommerce-ready product visual with improved lighting, background, crop, and composition.
+10. Reference-based regeneration must preserve visible product shape, color, package structure, and readable labels, but must not invent unreadable labels, certifications, ingredients, or claims.
+11. Do not merge cuts into one tall image unless the user explicitly asks.
+12. Collect all outputs before final delivery.
 
-If the environment cannot truly run image jobs in parallel, keep the job design parallel and explain only if needed; do not change the required output count.
+If the environment cannot truly run image jobs in parallel, keep the job design parallel and explain only if needed; do not change the required output count or collapse multiple cuts into one image.
 
 ## Korean Text QA
 

@@ -1,5 +1,10 @@
 # History
 
+## 2026-05-13
+
+- Strengthened `ecommerce-detail-page` image-production rules so final cut images must use maximum available parallel agents by default.
+- Clarified the coordinator/worker pattern: the main agent splits approved cuts, launches all possible cut workers before waiting, keeps ownership scoped to `cut-01` through `cut-N`, collects outputs, regenerates only failed cuts, and builds the final gallery after all cuts finish.
+
 ## 2026-05-12
 
 - Built an `ecommerce-detail-page` Codex skill from the downloaded Korean ecommerce detail-page image guideline.
@@ -29,6 +34,9 @@
 - Started a new house-plum detail-page task from `/Users/firstandre/Downloads/drive-download-20260513T022015Z-3-001`; inspected 11 source images and created `generated/house-plum/source-contact-sheet.jpg` for photo analysis.
 - Generated the house-plum 12-cut detail-page image set under `generated/house-plum/cuts`, regenerated cut 03 after text QA, rebuilt `generated/house-plum/index.html`, and packaged `house-plum-12cuts.zip`.
 - Tightened image-production instructions so approved detail-page cuts must be generated through simultaneous parallel agents/jobs by default, launching every cut before waiting for results.
+- Created a recommended toothbrush detail-page brief at `generated/toothbrush-recommended/brief.md` using a 12-cut Coupang practical information style with missing product facts marked as confirmation needed.
+- Generated the recommended toothbrush 12-cut sales-draft detail-page image set under `generated/toothbrush-recommended/cuts`, built `index.html`, packaged `toothbrush-recommended-12cuts.zip`, and recorded QA in `qa-report.md`.
+- Added first-use guidance to `README.md` and `ecommerce-detail-page/SKILL.md`, including trigger phrases, recommended first inputs, default workflow, and minimal-input defaults.
 
 ## 2026-05-11
 
