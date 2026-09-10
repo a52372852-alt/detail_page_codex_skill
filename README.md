@@ -6,6 +6,9 @@ AI Sync Club Created by 싱크 License: MIT
 
 📌 AI Sync Club 커뮤니티 가입하기: https://litt.ly/aisyncclub
 
+- 원본 저장소: https://github.com/aisyncclub/detail_page_codex_skill
+- 이 수정본: https://github.com/a52372852-alt/detail_page_codex_skill
+
 ## AI Sync Club 링크
 
 - [전체 링크 모음](https://litt.ly/aisyncclub)
@@ -34,7 +37,7 @@ Claude/Codex에서 한국형 이커머스 상세페이지를 기획하고, 승�
 
 ```bash
 mkdir -p ~/.codex/skills
-git clone https://github.com/aisyncclub/detail_page_codex_skill.git /tmp/detail_page_codex_skill
+git clone https://github.com/a52372852-alt/detail_page_codex_skill.git /tmp/detail_page_codex_skill
 cp -R /tmp/detail_page_codex_skill/ecommerce-detail-page ~/.codex/skills/ecommerce-detail-page
 ```
 
@@ -55,7 +58,7 @@ Claude Code에서도 같은 스킬 폴더를 사용할 수 있습니다.
 
 ```bash
 mkdir -p ~/.claude/skills
-git clone https://github.com/aisyncclub/detail_page_codex_skill.git /tmp/detail_page_codex_skill
+git clone https://github.com/a52372852-alt/detail_page_codex_skill.git /tmp/detail_page_codex_skill
 cp -R /tmp/detail_page_codex_skill/ecommerce-detail-page ~/.claude/skills/ecommerce-detail-page
 ```
 
