@@ -59,7 +59,7 @@ Use this exact structure for final plans.
 
 **사용 사진:** 이 컷에 필요한 원본 사진 유형을 쓴다. 예: 제품 정면, 패키지, 제형, 사용 장면, 구성품, 배송 포장.
 
-**디자인 메모:** 모바일 가독성, 컬러, 폰트 느낌, 여백, 금지 요소를 적는다.
+**디자인 메모:** 모바일 가독성, 컬러, 폰트 느낌, 여백, 금지 요소를 적는다. 모든 최종 컷에는 상단과 하단에 각각 정확히 60픽셀의 빈 순백색(`#FFFFFF`) 영역을 둔다.
 
 **최종 이미지 QA:** 텍스트 포함, 모바일 가독성, 상품 일치, 판매 가능성, 준법 표현을 점검한다.
 
@@ -115,6 +115,7 @@ For a consistency-sensitive series, create or select an anchor cut first and pas
 
 Final images must be sellable marketplace detail-page cuts:
 
+- Generate the content image first, then run `scripts/add-white-margins.py` to add exact full-width 60-pixel white bands at the top and bottom. Build the gallery and ZIP from the margin-verified outputs.
 - Render the approved Korean headline, subcopy, labels, guide text, and CTA inside the image.
 - Do not leave blank text-safe areas, placeholder bars, or unlabeled mockup blocks in final images.
 - Use mobile-readable type, strong contrast, and Naver/Coupang-style ecommerce hierarchy.

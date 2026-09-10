@@ -122,8 +122,9 @@ Codex에서 자연어로 호출합니다:
 2. 사진이 있으면 품질과 구도를 분석하고 컷별 배치를 추천합니다.
 3. 필요한 질문은 한 번에 하나씩 선택지로 묻습니다.
 4. 먼저 컷별 카피, 이미지 구성, ASCII 레이아웃이 포함된 기획안을 만듭니다.
-5. 승인 후 최대 병렬 작업으로 컷별 이미지를 생성합니다.
-6. HTML 검수/다운로드 페이지, ZIP 파일, QA 리포트를 만듭니다.
+5. 일관성이 필요한 경우 기준 컷을 먼저 확정한 뒤 독립된 컷을 병렬 생성합니다.
+6. 모든 컷의 상단과 하단에 각각 정확히 60픽셀의 흰색 여백을 붙이고 픽셀 단위로 검증합니다.
+7. HTML 검수/다운로드 페이지, ZIP 파일, QA 리포트를 만듭니다.
 
 중요 운영 규칙: 최종 이미지는 승인된 한국어 카피를 정확히 포함해야 합니다. 짧은 문구는 이미지 생성 단계에서 넣을 수 있고, 긴 원문·법정·사양 문구는 결정론적 타이포그래피로 배치합니다. 한글이 깨지거나 빠진 컷은 실패로 처리합니다.
 
@@ -135,6 +136,7 @@ Codex에서 자연어로 호출합니다:
 - 부분 수정은 대상 컷만 새 버전으로 만들고, 나머지 컷은 그대로 보존합니다.
 - 긴 한국어 원문과 법정·사양 문구는 정확한 글자 보존을 위해 결정론적 타이포그래피를 허용합니다.
 - 검수 페이지의 `전체 다운로드`를 실제 ZIP 파일 링크로 만들어 브라우저의 다중 다운로드 차단 문제를 피합니다.
+- 모든 최종 이미지에 상단 60px·하단 60px의 빈 순백색 여백을 자동으로 추가하고 검증합니다.
 
 ## Contents
 
@@ -160,4 +162,7 @@ Codex에서 자연어로 호출합니다:
 ```bash
 python3 "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" ecommerce-detail-page
 node --check ecommerce-detail-page/scripts/build-image-gallery.mjs
+python3 ecommerce-detail-page/scripts/add-white-margins.py --help
 ```
+
+정확한 여백 처리 스크립트는 Pillow를 사용합니다. 실행 환경에 Pillow가 없다면 `python3 -m pip install -r ecommerce-detail-page/requirements.txt`로 설치합니다.
