@@ -1,6 +1,6 @@
 ---
 name: ecommerce-detail-page
-description: Use when the user wants to make, plan, improve, or generate an ecommerce product detail page, including Korean phrases like "상세페이지 만들고 싶다", "상세페이지 제작", "상품 상세페이지", or "상세페이지 이미지". Produces mobile-first cut plans, Korean sales copy, image composition, ASCII wireframes, style-template choices, product-photo placement recommendations, compliance checks, and sales-ready Naver/Coupang-style image cuts. Ask one choice-based question at a time, check product photos first, analyze provided images for layout/composition opportunities, infer/research target customers after product name or category, mark recommendations with "(추천)", treat sales channel as optional, plan before image generation, and render approved Korean copy inside final images with the image-generation model.
+description: Use when the user wants to make, revise, improve, or generate an ecommerce product detail page, including Korean phrases like "상세페이지 만들고 싶다", "상세페이지 제작", "상품 상세페이지", or "상세페이지 이미지". Produces mobile-first cut plans, Korean sales copy, reference-faithful product visuals, targeted cut revisions, review galleries, and downloadable image packages for Naver, Coupang, and similar marketplaces.
 ---
 
 # Ecommerce Detail Page
@@ -46,7 +46,7 @@ Default recommended settings when the user gives minimal input:
 | Cut count | 12 cuts |
 | Sales channel | Channel-neutral mobile ecommerce |
 | Product facts | Use only provided facts; mark missing fields as `확인 필요` |
-| Image production | One image per cut, maximum available parallel agents/jobs |
+| Image production | One image per cut; lock an anchor first when cross-cut consistency matters |
 
 ## Non-Negotiables
 
@@ -55,6 +55,7 @@ Default recommended settings when the user gives minimal input:
 - At the beginning, check whether the user has product photos. If photos are provided, use those photos as the product appearance source of truth for planning and image production.
 - When product photos are provided, analyze the images before planning. Identify product angle, visible package/label, color, texture, background quality, usable crop areas, text-safe spaces, strengths, defects, and which cuts each image should be used for. Then recommend image placement and composition per cut.
 - If provided product photos are low quality for final sales use, do not silently use them as-is. Mark the photo status as `재생성 권장`, explain the specific issue, and ask whether to regenerate cleaner detail-page visuals using the photo as a reference before final image production.
+- Before reference-based generation or revision, create a short product-invariant ledger that records locked product geometry, material order, trim/seam placement, color, texture, labels, and other visible details. Read [revision-workflow.md](references/revision-workflow.md) when exact product fidelity, cross-cut consistency, or a targeted correction matters.
 - For true sales-ready final images, request enough product photos: front/package, actual product or contents, detail/texture, options/colors, components, size reference, usage scene, and shipping package when relevant. For cosmetics, food, health supplements, baby, and pet products, label/ingredients/cautions photos are especially important.
 - If product photos or verified sale facts are missing, final image output can only be a sales draft/concept, not a fully production-ready marketplace page. Say this plainly before image production.
 - The user may provide only a product name or category. In that case, infer a recommended category if needed, research or infer likely target customers, cut count, and selling angle, then clearly mark them as assumptions or confirmation-needed items.
@@ -65,12 +66,12 @@ Default recommended settings when the user gives minimal input:
 - Planning-stage ASCII wireframes are only for approval. Final image production must render the approved Korean headline, subcopy, labels, option/guide text, CTA, and required notices directly inside the image like a real Naver Smart Store or Coupang product detail page.
 - Do not generate blank text-safe images, placeholder bars, unlabeled mockups, or pure product photos when the user asks for final detail-page images. Those are draft assets, not sellable detail pages.
 - If essential sellable facts are missing, either ask for them before final production or mark only legally safe fields as `확인 필요` in the image. Do not invent brand names, certifications, ingredients, reviews, prices, rankings, delivery promises, or measurable performance claims.
-- Final image production must use the image-generation model as the production tool, including the Korean text inside the image. Do not switch to deterministic text overlay, SVG/Sharp, Photoshop-style compositing, or manual post-processing unless the user explicitly asks for that separate workflow.
-- If Korean text inside final images is missing, broken, unreadable, replaced with English, or materially different from the approved copy, treat the image as failed and regenerate it with a stricter image-generation prompt. Do not patch the text afterward unless the user explicitly asks for post-processing.
+- Use the image-generation model for product and lifestyle visuals. For short copy, it may render the approved Korean copy in the image. For copy-heavy, exact-wording, legal, specification, or brand-story cuts, use a deterministic typography/layout layer after generating the visual so every supplied character remains exact. Never rewrite user-supplied copy during layout.
+- If Korean text inside final images is missing, broken, unreadable, replaced with English, or materially different from the approved copy, treat the image as failed. Regenerate a short-copy cut with a stricter image-generation prompt; use deterministic typography for exact or long copy.
 - If image generation starts, generate exactly the planned cut count. Never collapse a 12-cut plan into fewer images or one combined image unless the user explicitly asks for a combined mockup.
-- Image production must use maximum available parallel agents/jobs by default to reduce generation time. This is a hard scheduling rule, not an optional optimization. The coordinating agent should split the approved plan into independent `cut-01` through `cut-N` jobs, launch as many cut workers at the same time as the environment allows, then wait only after all possible workers are running. Never generate cut 1, wait, then generate cut 2 sequentially unless the environment truly cannot run parallel work.
-- If the environment exposes subagents or parallel job execution, use them for final cut generation by default. Assign one cut per worker, keep each worker's output path disjoint, and do not begin QA, gallery assembly, or regeneration until the initial maximum parallel batch has been launched.
-- After all cut images are complete, build an HTML review/download page that shows images sequentially and provides a `전체 다운로드` button. Use `scripts/build-image-gallery.mjs` when local image files are available.
+- For a consistency-sensitive product, first create or select one approved anchor cut that shows the product clearly. Lock its product, model, environment, palette, and camera cues, then generate the remaining independent cuts in parallel from that shared anchor. If no cross-cut identity must be preserved, parallelize immediately.
+- If the environment exposes subagents or parallel job execution and the workflow benefits from them, assign disjoint cut ownership and shared invariant/anchor references. Do not trade away product fidelity merely to maximize parallelism.
+- After all cut images are complete, build an HTML review/download page that shows images sequentially and provides a ZIP-backed `전체 다운로드` link. Use `scripts/build-image-gallery.mjs` when local image files are available.
 - After generation, run a text QA pass for every cut. Check that approved Korean copy is present, readable, not broken, not translated, not replaced, and not missing. Failed cuts must be regenerated with stricter prompts.
 - Confirm the product category through user selection, or explicitly mark the recommended category as an assumption when proceeding from product name only.
 - Ask only for missing information; do not re-ask what the user already gave.
@@ -310,23 +311,23 @@ C. 상품 사진 또는 사실 정보 추가 후 다시 기획
 ### Production stage
 
 5. Treat the approved or latest plan as the source of truth for image generation.
-6. Generate sales-ready images cut by cut using the image-generation model, each cut's approved copy, image composition, ASCII wireframe, design notes, and product photo reference if provided.
-7. The generated image must include the approved Korean text inside the image: headline, subcopy, labels, key benefit text, guide text, and CTA when present. Preserve mobile readability with large type, strong hierarchy, and enough contrast.
+5a. When a product photo or an approved generated cut defines exact appearance, read [revision-workflow.md](references/revision-workflow.md), write the invariant ledger, and name the anchor image before starting the remaining cuts.
+6. Generate sales-ready product and lifestyle visuals cut by cut using the image-generation model, each cut's approved composition, ASCII wireframe, design notes, and product photo reference if provided.
+7. The final image must include the approved Korean text: headline, subcopy, labels, key benefit text, guide text, and CTA when present. Use direct image generation for short copy or deterministic typography for exact/long copy. Preserve mobile readability with large type, strong hierarchy, and enough contrast.
 8. If the approved photo-analysis status is `재생성 권장`, use the photo as a reference image instead of a direct final asset: regenerate a cleaner ecommerce-ready version with improved lighting, background, crop, and composition while preserving only visible product facts.
 9. Final images must be actual backgrounds, product photos/visuals, information blocks, and Korean copy composed together. They must not be blank text-safe images, placeholder-only layouts, or decorative concept art.
-10. If the image-generation model does not render Korean text accurately, regenerate the cut with a clearer prompt that repeats the exact Korean text, reduces text volume, increases text size, and simplifies the layout. The default recovery path is regeneration with the image model, not text overlay.
+10. If the image-generation model does not render short Korean copy accurately, regenerate with a clearer prompt that repeats the exact text, reduces text volume, increases text size, and simplifies the layout. For long or exact supplied copy, generate the visual without embedded copy and apply a deterministic Korean typography layer.
 11. Generate exactly the planned number of images, one image per cut. If a plan has 12 cuts, produce 12 separate cut images.
-12. Start all cut image jobs with maximum parallelism whenever the environment allows it. This must happen before waiting on individual cut results. Preferred pattern:
-    - the main agent acts only as coordinator, QA reviewer, and final assembler
-    - create one parallel image-generation worker per cut by default
+12. Use parallel cut jobs after any required anchor cut is approved or selected. Preferred pattern:
+    - the main agent coordinates, reviews consistency, and assembles the deliverables
+    - create independent image-generation workers for cuts that do not depend on one another
     - assign disjoint ownership such as `cut-01`, `cut-02`, ..., `cut-N`
     - give each worker only its approved cut copy, layout, style, product photo reference, and output filename
-    - launch all available workers first; do not wait for any worker result until every possible worker has started
+    - give every worker the same invariant ledger and anchor reference before launch
     - for very large plans or tool limits, launch the largest supported batch, then immediately launch the next batch as slots free up
-    - if any accidental sequential generation starts, stop, preserve any completed cut, update the remaining work into parallel cut jobs, and continue from the missing cuts only
     - collect all outputs before final delivery and regenerate only failed cuts
 13. Do not merge all cuts into one tall image unless explicitly requested.
-14. When all images are complete, create an HTML review page using [image-production-workflow.md](references/image-production-workflow.md). The page must show cuts in order and include download links plus a `전체 다운로드` button.
+14. When all images are complete, create an HTML review page using [image-production-workflow.md](references/image-production-workflow.md). The page must show cuts in order and include per-cut links plus a ZIP-backed `전체 다운로드` link.
 15. Run the Korean text QA checklist before final delivery. If any cut fails, regenerate only the failed cut with a stricter prompt.
 16. Even if the user asks to move fast, show the planning output first and ask the generate-or-revise choice before starting image production.
 
@@ -366,7 +367,7 @@ Final detail-page images must look like real marketplace detail-page sections, n
 15. Run the final compliance and quality pass in [copy-compliance.md](references/copy-compliance.md).
 16. Ask whether to generate images or revise before image production.
 17. During final image production, render the approved Korean text directly inside each image and verify no cut is textless or placeholder-only.
-18. Generate all approved cut images through simultaneous parallel agents when possible, then build the sequential HTML gallery/download page and run Korean text QA.
+18. For consistency-sensitive work, approve or select an anchor cut first; then generate independent cuts in parallel when useful. Build the sequential HTML gallery, actual ZIP download package, and QA report after all cuts are ready.
 
 ## Output Contract
 
@@ -410,10 +411,12 @@ Before answering, verify:
 - If product photos were weak, the plan states whether each weak photo should be used as-is, replaced, or used only as a reference for cleaner regenerated visuals.
 - Each cut is specific enough to create an actual image.
 - Planning output uses ASCII wireframes instead of image-generation prompts.
-- Final generated images include the approved Korean text inside the image.
+- Final generated images include the approved Korean text, with deterministic typography used when exact or long copy requires it.
 - No final image is a blank-placeholder layout unless the user explicitly requested a wireframe or background-only asset.
 - Final generated images pass Korean text QA: no missing text, broken Hangul, unreadable small type, English substitution, or unapproved wording.
-- Generated image files are collected into a sequential HTML gallery with per-cut downloads and a `전체 다운로드` action when local files are available.
+- Generated image files are collected into a sequential HTML gallery with per-cut downloads and a real ZIP-backed `전체 다운로드` action when local files are available.
+- Reference-based outputs match the product-invariant ledger and approved anchor cut, including material topology and seam/trim placement.
+- A targeted revision changes only the requested defect; unchanged cuts and prior versions remain preserved.
 - Product visuals and text do not conflict with provided photos or verified facts.
 - Unverified information is not inserted as a definite claim.
 - The result contains enough buying information to resemble a Naver/Coupang marketplace detail page.

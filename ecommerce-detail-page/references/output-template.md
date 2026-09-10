@@ -17,6 +17,7 @@ Use this exact structure for final plans.
 | 권장 컷 수 |  |
 | 상품 사진 | 있음/없음/확인 필요 |
 | 상세페이지 스타일 |  |
+| 기준 이미지(앵커) | 파일명/컷 번호/없음 |
 
 ## 2. 상세페이지 핵심 전략
 
@@ -29,6 +30,10 @@ Use this exact structure for final plans.
 | 이미지 | 파악한 내용 | 품질 상태 | 강점 | 주의점 | 추천 컷/용도 | 배치/재생성 추천 |
 |---|---|---|---|---|---|---|
 | 이미지 1 |  |  |  |  |  |  |
+
+### 상품 고정 조건
+
+상품 구조, 소재 순서, 끝단/봉제/부자재 위치, 색상, 질감, 라벨 등 컷 전체에서 유지할 항목을 짧은 표로 기록한다. 정밀한 레퍼런스 일치나 부분 수정이 필요한 경우 [revision-workflow.md](revision-workflow.md)를 따른다.
 
 ## 4. 이미지 컷별 제작안
 
@@ -57,6 +62,8 @@ Use this exact structure for final plans.
 **디자인 메모:** 모바일 가독성, 컬러, 폰트 느낌, 여백, 금지 요소를 적는다.
 
 **최종 이미지 QA:** 텍스트 포함, 모바일 가독성, 상품 일치, 판매 가능성, 준법 표현을 점검한다.
+
+**고정/변경 범위:** 기준 이미지에서 반드시 유지할 항목과 이 컷에서 바꿔도 되는 항목을 구분한다.
 
 **확인 필요:** 사용자가 제공하지 않아 검증이 필요한 정보를 적는다.
 
@@ -104,15 +111,16 @@ ASCII is only a planning blueprint. Do not output ASCII boxes, placeholder label
 
 When the user chooses image generation, convert the approved cut plan into production prompts internally. Generate one separate image per cut, exactly matching the approved cut count. Use the product photo as the visual source if one was provided.
 
-Generate cut images through simultaneous parallel agents whenever possible. Start one independent cut-generation agent/job for every planned cut before waiting for any result. After all cuts are complete, build a sequential HTML review/download page with `scripts/build-image-gallery.mjs`. The HTML must show every cut in order, include per-cut download links, and include a `전체 다운로드` action.
+For a consistency-sensitive series, create or select an anchor cut first and pass its invariant ledger to every later cut job. Parallelize independent cuts after the anchor is stable. After all cuts are complete, build a sequential HTML review/download page with `scripts/build-image-gallery.mjs`. The HTML must show every cut in order, include per-cut download links, and link `전체 다운로드` to a generated ZIP file.
 
 Final images must be sellable marketplace detail-page cuts:
 
 - Render the approved Korean headline, subcopy, labels, guide text, and CTA inside the image.
 - Do not leave blank text-safe areas, placeholder bars, or unlabeled mockup blocks in final images.
 - Use mobile-readable type, strong contrast, and Naver/Coupang-style ecommerce hierarchy.
-- Use the image-generation model itself to render the Korean text in the final image. Do not default to external text overlay or post-processing.
-- If the image generator cannot render Korean text accurately, regenerate with a stricter prompt: exact text repeated, fewer text blocks, larger type, simpler layout, and explicit instruction that Korean text must not be changed.
+- Use the image-generation model for product and lifestyle visuals. Short Korean copy may be rendered directly in generation.
+- For long, exact, legal, specification, or supplied brand-story copy, use deterministic typography after visual generation so every character is correct.
+- If short generated Korean text is inaccurate, regenerate with the exact text repeated, fewer text blocks, larger type, and a simpler layout.
 - If product photos or verified sale facts are missing, label the output as a sales draft and avoid fabricated claims.
 - If Korean text is missing, broken, unreadable, translated to English, or different from the approved copy, regenerate the image before delivery unless the user explicitly asks for post-processing.
 - Required sale facts for production-ready output: product name, brand/seller name, options/colors, composition/quantity, volume/size, origin/material/ingredients when relevant, use/storage/caution guidance, delivery/return/exchange policy, and evidence for any certification, review, ranking, or numeric claim.

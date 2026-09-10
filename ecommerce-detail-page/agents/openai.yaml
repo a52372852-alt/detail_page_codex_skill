@@ -1,7 +1,7 @@
 interface:
   display_name: "Ecommerce Detail Page"
-  short_description: "모바일 상세페이지 컷별 이미지 기획"
-  default_prompt: "Use $ecommerce-detail-page to plan a mobile-first ecommerce detail page image sequence for my product."
+  short_description: "상품 일관성을 지키는 모바일 상세페이지 제작·수정"
+  default_prompt: "Use $ecommerce-detail-page to plan, generate, or revise a mobile-first ecommerce detail page while preserving my product references."
 
 policy:
   allow_implicit_invocation: true

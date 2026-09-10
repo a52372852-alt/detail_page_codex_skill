@@ -39,6 +39,8 @@ When photos are provided, add this section before strategy:
 - If a photo is too blurry, dark, cluttered, low-resolution, cropped, distorted, or not premium enough for a sales page, mark it as `재생성 권장` and recommend generating a cleaner ecommerce-ready product visual from the photo reference.
 - Do not place text over important labels, faces, small details, or busy backgrounds.
 - If product colors matter, prefer real photo colors over generated colors and warn when lighting may distort color.
+- For products with visible construction details, describe the material topology in order from the main body to the outer edge. Record where a seam, piping, border, fastener, or printed boundary sits relative to the material junction.
+- When the user identifies a well-made image or cut, label it as the anchor reference and use it to lock product construction, model identity, environment, palette, and camera cues across later cuts.
 
 ## Regeneration Request Rules
 
@@ -70,3 +72,5 @@ In final image-generation prompts, explicitly state how to use the provided phot
 - `Place the product photo in the center hero area.`
 - `Use the package photo only for the caution/info section.`
 - `Do not invent unseen labels, certifications, ingredients, or claims.`
+- `Preserve this exact material topology and construction relationship: [ordered product layers and junctions].`
+- `Use [anchor filename] to preserve the same model, room, lighting, palette, and product details; change only [allowed variation].`

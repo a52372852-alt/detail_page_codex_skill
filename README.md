@@ -2,7 +2,7 @@
 
 AI Sync Club Created by 싱크 License: MIT
 
-상품명, 카테고리, 상품 사진을 바탕으로 모바일 쇼핑몰 상세페이지 기획안과 컷별 이미지 제작안을 만드는 AI Sync Club 공식 Codex 스킬입니다.
+상품명, 카테고리, 상품 사진을 바탕으로 모바일 쇼핑몰 상세페이지 기획안과 컷별 이미지 제작안을 만드는 AI Sync Club 공식 Codex 스킬의 수정본입니다. 원본 저장소의 이력과 출처를 유지합니다.
 
 📌 AI Sync Club 커뮤니티 가입하기: https://litt.ly/aisyncclub
 
@@ -122,7 +122,16 @@ Codex에서 자연어로 호출합니다:
 5. 승인 후 최대 병렬 작업으로 컷별 이미지를 생성합니다.
 6. HTML 검수/다운로드 페이지, ZIP 파일, QA 리포트를 만듭니다.
 
-중요 운영 규칙: 최종 이미지는 승인된 한국어 카피를 이미지 안에 직접 포함해야 합니다. 한글이 깨지거나 빠진 컷은 실패로 보고 재생성합니다.
+중요 운영 규칙: 최종 이미지는 승인된 한국어 카피를 정확히 포함해야 합니다. 짧은 문구는 이미지 생성 단계에서 넣을 수 있고, 긴 원문·법정·사양 문구는 결정론적 타이포그래피로 배치합니다. 한글이 깨지거나 빠진 컷은 실패로 처리합니다.
+
+### 이 수정본의 개선 사항
+
+- 상품 구조, 소재 순서, 끝단, 봉제선, 부자재 위치를 `상품 고정 조건`으로 먼저 기록합니다.
+- 사용자가 지정한 잘된 컷을 기준 이미지로 삼아 제품, 모델, 배경, 조명 일관성을 유지합니다.
+- 정밀도가 필요한 시리즈는 기준 컷을 먼저 확정한 뒤 나머지 독립 컷을 병렬 제작합니다.
+- 부분 수정은 대상 컷만 새 버전으로 만들고, 나머지 컷은 그대로 보존합니다.
+- 긴 한국어 원문과 법정·사양 문구는 정확한 글자 보존을 위해 결정론적 타이포그래피를 허용합니다.
+- 검수 페이지의 `전체 다운로드`를 실제 ZIP 파일 링크로 만들어 브라우저의 다중 다운로드 차단 문제를 피합니다.
 
 ## Contents
 
@@ -146,6 +155,6 @@ Codex에서 자연어로 호출합니다:
 ## 검증
 
 ```bash
-python3 /Users/firstandre/.nvm/versions/node/v22.14.0/lib/node_modules/openclaw/skills/skill-creator/scripts/quick_validate.py ecommerce-detail-page
+python3 "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" ecommerce-detail-page
 node --check ecommerce-detail-page/scripts/build-image-gallery.mjs
 ```

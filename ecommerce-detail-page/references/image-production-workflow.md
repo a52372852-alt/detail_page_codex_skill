@@ -2,24 +2,22 @@
 
 Use this after the user approves a cut plan and chooses image generation.
 
-## Parallel Generation
+## Anchor and Parallel Generation
 
-Generate images through simultaneous parallel agents by default. The purpose is to reduce waiting time by starting all cut-production work before waiting for any single cut to finish. Use the maximum concurrency the environment supports.
+Choose consistency before speed when the same product, person, or room must recur.
 
 1. Fix the approved cut count first.
-2. The main agent is the coordinator only: it splits work, starts workers, collects outputs, runs QA, and builds the final gallery.
-3. Create one independent image-generation agent/job per cut by default: `cut-01`, `cut-02`, ..., `cut-N`.
-4. Give each cut agent only its assigned cut copy, layout, style template, product photo reference, and required output filename.
-5. Start all available cut agents/jobs at the same time when the environment supports parallel agents or parallel tool calls.
-6. Do not wait for `cut-01` before launching `cut-02`; launch every possible cut worker first, then collect results.
-7. If the environment has a worker/tool limit, run the largest supported batch and immediately launch the next waiting cut when one slot finishes. Keep the workflow parallel, not one-by-one.
-8. Each cut job must stay inside its assigned ownership. A worker for `cut-04` must not rewrite or regenerate `cut-03`.
-9. If the approved plan marks a product photo as `재생성 권장`, the cut job must use that photo as a reference only and generate a cleaner ecommerce-ready product visual with improved lighting, background, crop, and composition.
-10. Reference-based regeneration must preserve visible product shape, color, package structure, and readable labels, but must not invent unreadable labels, certifications, ingredients, or claims.
-11. Do not merge cuts into one tall image unless the user explicitly asks.
-12. Collect all outputs before final delivery.
+2. Read [revision-workflow.md](revision-workflow.md) and record the product-invariant ledger when a supplied photo or approved cut defines exact appearance.
+3. Use the user-named approved cut as the anchor. If none exists and cross-cut consistency matters, generate one clear anchor cut first and review it before the remaining cuts.
+4. Give every later cut job the same anchor image, invariant ledger, approved copy, style, and explicit allowed variations.
+5. Parallelize only the cuts that no longer depend on an unresolved anchor. Use the environment's available concurrency when this will not reduce visual consistency.
+6. Keep each cut job inside its assigned ownership. A worker for `cut-04` must not rewrite or regenerate `cut-03`.
+7. If the approved plan marks a product photo as `재생성 권장`, use that photo as appearance reference while improving lighting, background, crop, and composition.
+8. Preserve visible product shape, color, package structure, construction topology, and readable labels. Do not invent unreadable labels, certifications, ingredients, or claims.
+9. Do not merge cuts into one tall image unless the user explicitly asks.
+10. Collect and review all outputs before final delivery.
 
-If the environment cannot truly run image jobs in parallel, keep the job design parallel and explain only if needed; do not change the required output count or collapse multiple cuts into one image.
+If the environment cannot run image jobs in parallel, keep the required output count and continue sequentially. Do not collapse multiple planned cuts into one image.
 
 ## Korean Text QA
 
@@ -34,13 +32,21 @@ Fail and regenerate a cut if:
 - Text is too small for mobile reading.
 - Information claims conflict with provided facts or use unverified claims.
 
-Regeneration prompt rule:
+Recovery rule:
 
-- Repeat the exact Korean text.
-- Reduce the number of text blocks if needed.
-- Use larger type.
-- Simplify the layout.
-- Explicitly state that Korean text must not be changed, translated, or omitted.
+- For short copy, repeat the exact Korean text, reduce text blocks, use larger type, simplify the layout, and state that the text must not change.
+- For long, legal, specification, or user-supplied exact copy, keep the generated visual free of placeholder text and apply a deterministic typography/layout layer.
+- Compare the rendered text character-by-character with the approved copy before delivery.
+
+## Targeted Revision
+
+For a local defect such as trim position, seam path, a hand, or a label:
+
+1. Use the existing cut as the base image and the approved anchor/product photo as the reference.
+2. Name the one defect to change and list the product, person, background, copy, crop, lighting, and dimensions that must stay fixed.
+3. Edit the smallest practical region and regenerate only the affected cut.
+4. Save to a new versioned directory. Copy all unaffected cuts byte-for-byte.
+5. Check the target region at full resolution and reject any result that introduces drift elsewhere.
 
 ## HTML Review and Download Page
 
@@ -51,7 +57,7 @@ Requirements:
 - Show cuts sequentially from `cut-01` to `cut-N`.
 - Display each image full-width in a mobile-detail-page preview column.
 - Include a visible per-cut download link.
-- Include a `전체 다운로드` button that triggers all image downloads.
+- Create an actual ZIP archive beside the HTML and link `전체 다운로드` directly to it. Do not depend on a browser allowing multiple scripted downloads.
 - Include a simple QA status area for each cut: `통과`, `재생성 필요`, or `확인 필요`.
 
 Use the helper script:
@@ -68,4 +74,4 @@ node ecommerce-detail-page/scripts/build-image-gallery.mjs \
   /Users/firstandre/dev_test_file/detail_page_codex_skill/generated/lipstick/index.html
 ```
 
-Browser note: some browsers may ask permission before downloading multiple files. Per-cut links must remain visible as fallback.
+After building, open the ZIP with a standard integrity check such as `unzip -t`. Per-cut links must remain visible as fallback.
