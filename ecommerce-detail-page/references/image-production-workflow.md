@@ -50,7 +50,7 @@ For a local defect such as trim position, seam path, a hand, or a label:
 
 ## Exact Vertical White Margins
 
-Every delivered cut requires a blank, pure-white (`#FFFFFF`) band of exactly 60 pixels across the full width at the top and bottom.
+Every delivered detail-page body cut requires a blank, pure-white (`#FFFFFF`) band of exactly 60 pixels across the full width at the top and bottom.
 
 1. Generate or edit content images in a `raw/` directory without relying on the model to estimate pixel margins.
 2. Keep all products, people, copy, logos, shadows, and decoration inside the content area.
@@ -68,6 +68,24 @@ python3 ecommerce-detail-page/scripts/add-white-margins.py \
 5. Build the HTML gallery and ZIP from `images/`, never from `raw/`.
 6. If the marketplace requires a fixed final height, size the content area to `final height - 120 pixels` before adding the bands.
 
+## Thumbnail Output
+
+Treat a product thumbnail as a separate deliverable from the vertical detail-page body cuts.
+
+- Generate the thumbnail source at a 1:1 aspect ratio.
+- Do not add the 60-pixel top or bottom bands.
+- Keep the product, model, background, and approved thumbnail copy inside the square composition.
+- Create and verify the final PNG at exactly 1000x1000 pixels:
+
+```bash
+python3 ecommerce-detail-page/scripts/make-thumbnail.py \
+  /path/to/raw-thumbnail.png \
+  /path/to/thumbnail-1000x1000.png
+```
+
+- The helper refuses a non-square source instead of cropping or distorting the product. Regenerate a square source when it fails.
+- Never place thumbnail source files in the `raw/` directory passed to `add-white-margins.py`.
+
 ## HTML Review and Download Page
 
 When generated files are available locally, create an HTML page after all cuts are complete.
@@ -79,7 +97,7 @@ Requirements:
 - Include a visible per-cut download link.
 - Create an actual ZIP archive beside the HTML and link `전체 다운로드` directly to it. Do not depend on a browser allowing multiple scripted downloads.
 - Include a simple QA status area for each cut: `통과`, `재생성 필요`, or `확인 필요`.
-- Use the margin-verified `images/` directory as the gallery source.
+- Use the margin-verified `images/` directory as the body-cut gallery source. Link the separate 1000x1000 thumbnail independently when one exists.
 
 Use the helper script:
 

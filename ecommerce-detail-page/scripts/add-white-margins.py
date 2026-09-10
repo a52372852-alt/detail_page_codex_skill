@@ -17,10 +17,16 @@ except ImportError as error:
 
 
 SUPPORTED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
+THUMBNAIL_MARKERS = ("thumbnail", "thumb", "썸네일", "대표이미지")
 
 
 def natural_key(path: Path) -> list[object]:
     return [int(part) if part.isdigit() else part.lower() for part in re.split(r"(\d+)", path.name)]
+
+
+def looks_like_thumbnail(path: Path) -> bool:
+    stem = path.stem.lower().replace(" ", "")
+    return any(marker in stem for marker in THUMBNAIL_MARKERS)
 
 
 def is_pure_white_band(image: Image.Image, top: int, bottom: int) -> bool:
@@ -96,6 +102,13 @@ def main() -> int:
     )
     if not sources:
         parser.error(f"No supported images found in: {input_dir}")
+
+    thumbnail_sources = [source.name for source in sources if looks_like_thumbnail(source)]
+    if thumbnail_sources:
+        parser.error(
+            "Thumbnail-like files must stay outside the body-cut margin workflow: "
+            + ", ".join(thumbnail_sources)
+        )
 
     output_names = [f"{source.stem}.png" for source in sources]
     if len(output_names) != len(set(output_names)):

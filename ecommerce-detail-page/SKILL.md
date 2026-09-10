@@ -1,6 +1,6 @@
 ---
 name: ecommerce-detail-page
-description: Use when the user wants to make, revise, improve, or generate an ecommerce product detail page, including Korean phrases like "상세페이지 만들고 싶다", "상세페이지 제작", "상품 상세페이지", or "상세페이지 이미지". Produces mobile-first cut plans, Korean sales copy, reference-faithful product visuals, targeted cut revisions, exact white image margins, review galleries, and downloadable image packages for Naver, Coupang, and similar marketplaces.
+description: Use when the user wants to make, revise, improve, or generate an ecommerce product detail page or product thumbnail, including Korean phrases like "상세페이지 만들고 싶다", "상세페이지 제작", "상품 상세페이지", "상세페이지 이미지", or "썸네일 제작". Produces mobile-first cut plans, Korean sales copy, reference-faithful product visuals, 1000x1000 thumbnails, targeted cut revisions, exact white image margins, review galleries, and downloadable image packages for Naver, Coupang, and similar marketplaces.
 ---
 
 # Ecommerce Detail Page
@@ -69,7 +69,8 @@ Default recommended settings when the user gives minimal input:
 - Use the image-generation model for product and lifestyle visuals. For short copy, it may render the approved Korean copy in the image. For copy-heavy, exact-wording, legal, specification, or brand-story cuts, use a deterministic typography/layout layer after generating the visual so every supplied character remains exact. Never rewrite user-supplied copy during layout.
 - If Korean text inside final images is missing, broken, unreadable, replaced with English, or materially different from the approved copy, treat the image as failed. Regenerate a short-copy cut with a stricter image-generation prompt; use deterministic typography for exact or long copy.
 - If image generation starts, generate exactly the planned cut count. Never collapse a 12-cut plan into fewer images or one combined image unless the user explicitly asks for a combined mockup.
-- Every final cut must have a blank, pure-white (`#FFFFFF`) 60-pixel band across the full width at both the top and bottom. Keep products, people, copy, logos, shadows, and decoration outside these bands. Generate the content image first, then run `scripts/add-white-margins.py` so the margin size is exact rather than visually estimated.
+- Every final detail-page body cut must have a blank, pure-white (`#FFFFFF`) 60-pixel band across the full width at both the top and bottom. Keep products, people, copy, logos, shadows, and decoration outside these bands. Generate the content image first, then run `scripts/add-white-margins.py` so the margin size is exact rather than visually estimated.
+- Thumbnail exception: create the thumbnail as a separate exact 1000x1000-pixel image with no added top or bottom margin bands. Generate it at a 1:1 aspect ratio and run `scripts/make-thumbnail.py` for deterministic sizing. Never pass a thumbnail through `add-white-margins.py`. Do not count the thumbnail as a detail-page body cut unless the user explicitly includes it in the cut count.
 - For a consistency-sensitive product, first create or select one approved anchor cut that shows the product clearly. Lock its product, model, environment, palette, and camera cues, then generate the remaining independent cuts in parallel from that shared anchor. If no cross-cut identity must be preserved, parallelize immediately.
 - If the environment exposes subagents or parallel job execution and the workflow benefits from them, assign disjoint cut ownership and shared invariant/anchor references. Do not trade away product fidelity merely to maximize parallelism.
 - After all cut images are complete, build an HTML review/download page that shows images sequentially and provides a ZIP-backed `전체 다운로드` link. Use `scripts/build-image-gallery.mjs` when local image files are available.
@@ -319,7 +320,8 @@ C. 상품 사진 또는 사실 정보 추가 후 다시 기획
 9. Final images must be actual backgrounds, product photos/visuals, information blocks, and Korean copy composed together. They must not be blank text-safe images, placeholder-only layouts, or decorative concept art.
 10. If the image-generation model does not render short Korean copy accurately, regenerate with a clearer prompt that repeats the exact text, reduces text volume, increases text size, and simplifies the layout. For long or exact supplied copy, generate the visual without embedded copy and apply a deterministic Korean typography layer.
 11. Generate exactly the planned number of images, one image per cut. If a plan has 12 cuts, produce 12 separate cut images.
-11a. Save generated content images in a `raw/` directory. Run `python3 scripts/add-white-margins.py raw images --top 60 --bottom 60` to create final PNG files with exact white bands before text QA, gallery assembly, or ZIP packaging.
+11a. Save generated detail-page body images in a `raw/` directory. Run `python3 scripts/add-white-margins.py raw images --top 60 --bottom 60` to create final PNG files with exact white bands before text QA, gallery assembly, or ZIP packaging.
+11b. If a thumbnail is requested, generate a separate square source and run `python3 scripts/make-thumbnail.py raw-thumbnail.png thumbnail-1000x1000.png`. Confirm the result is exactly 1000x1000 and has no added 60-pixel bands.
 12. Use parallel cut jobs after any required anchor cut is approved or selected. Preferred pattern:
     - the main agent coordinates, reviews consistency, and assembles the deliverables
     - create independent image-generation workers for cuts that do not depend on one another
@@ -342,7 +344,8 @@ Final detail-page images must look like real marketplace detail-page sections, n
 - Match Naver/Coupang-style ecommerce conventions: clear top headline, product-centered visual, short benefit labels, clean info blocks, and readable mobile typography.
 - Use the image-generation model for product and lifestyle visuals. Use direct generation or deterministic typography for Korean copy according to the approved copy length and accuracy requirement.
 - Keep each cut self-contained and uploadable as a marketplace detail image.
-- Reserve exactly 60 pixels of blank `#FFFFFF` space above and below every final cut. The content area begins below the top band and ends above the bottom band.
+- Reserve exactly 60 pixels of blank `#FFFFFF` space above and below every final detail-page body cut. The content area begins below the top band and ends above the bottom band.
+- Keep the thumbnail separate at exactly 1000x1000 pixels with no added top or bottom margin bands.
 - If product photos are absent, the result is a `판매용 초안` using a generic product visual. For true production use, clearly request real product/package photos and verified facts.
 - Text must remain compliant. Missing facts may be shown as neutral labels such as `상세 정보 확인 필요`, but claims must not be fabricated.
 - Every final cut must pass text QA: approved Korean copy is present, readable on mobile, spelled correctly, not replaced with English/filler text, and aligned with the product facts.
@@ -371,7 +374,8 @@ Final detail-page images must look like real marketplace detail-page sections, n
 16. Ask whether to generate images or revise before image production.
 17. During final image production, render the approved Korean text directly inside each image and verify no cut is textless or placeholder-only.
 18. For consistency-sensitive work, approve or select an anchor cut first; then generate independent cuts in parallel when useful.
-19. Add and verify the exact 60-pixel white top and bottom bands on every cut, then build the sequential HTML gallery, actual ZIP download package, and QA report.
+19. Add and verify the exact 60-pixel white top and bottom bands on every detail-page body cut.
+20. If requested, create and verify the separate 1000x1000 thumbnail without margin bands, then build the sequential HTML gallery, actual ZIP download package, and QA report.
 
 ## Output Contract
 
@@ -421,7 +425,8 @@ Before answering, verify:
 - Generated image files are collected into a sequential HTML gallery with per-cut downloads and a real ZIP-backed `전체 다운로드` action when local files are available.
 - Reference-based outputs match the product-invariant ledger and approved anchor cut, including material topology and seam/trim placement.
 - A targeted revision changes only the requested defect; unchanged cuts and prior versions remain preserved.
-- Every delivered cut has a full-width, pure-white top band of exactly 60 pixels and bottom band of exactly 60 pixels, verified at pixel level.
+- Every delivered detail-page body cut has a full-width, pure-white top band of exactly 60 pixels and bottom band of exactly 60 pixels, verified at pixel level.
+- Every requested thumbnail is a separate 1000x1000-pixel file and has not been processed by the body-cut margin script.
 - Product visuals and text do not conflict with provided photos or verified facts.
 - Unverified information is not inserted as a definite claim.
 - The result contains enough buying information to resemble a Naver/Coupang marketplace detail page.
